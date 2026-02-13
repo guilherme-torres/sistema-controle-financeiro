@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    command: ["tail", "-f", "/dev/null"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./app:/code/app/"
+      - "./alembic:/code/alembic/"
