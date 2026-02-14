@@ -16,3 +16,11 @@ class AlreadyLoggedOut(AppBaseException):
             error_code="already_logged_out",
             status_code=204
         )
+
+class InvalidSession(AppBaseException):
+    def __init__(self):
+        super().__init__(
+            message="Sessão expirada ou inválida",
+            error_code="invalid_session",
+            status_code=401
+        )

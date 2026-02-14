@@ -25,9 +25,11 @@ class UserService:
             self.session.rollback()
             raise e
 
-    def delete(self, id: int):
+    def delete(self, user_id: int, current_user_id: int):
         try:
-            if not self.user_repo.delete(id):
+            if user_id != current_user_id:
+                raise UserNotFound
+            if not self.user_repo.delete(user_id):
                 raise UserNotFound
             self.session.commit()
             return None

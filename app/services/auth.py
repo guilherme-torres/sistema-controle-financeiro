@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.exceptions.auth import InvalidCredentials
 from app.repositories.session import UserSessionRepository
 from app.repositories.user import UserRepository
-from app.schemas.auth import LoginDTO
+from app.schemas.auth import LoginDTO, UserSessionResponseDTO
 from app.security import verify_password
 
 
@@ -19,7 +19,7 @@ class AuthService:
         self.session = session
         self.user_repo = user_repo
         self.user_session_repo = user_session_repo
-        self.session_expires_seconds = 12 * 60 * 60
+        self.session_expires_seconds = 60 * 60
 
     def login(self, data: LoginDTO):
         try:
@@ -36,7 +36,10 @@ class AuthService:
             })
             self.session.commit()
             self.session.refresh(user_session)
-            return session_id
+            return UserSessionResponseDTO(
+                session_id=session_id,
+                expires_at=session_expires_at,
+            )
         except Exception as e:
             self.session.rollback()
             raise e

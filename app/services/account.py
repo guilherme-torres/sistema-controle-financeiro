@@ -9,7 +9,7 @@ class AccountService:
         self.session = session
         self.account_repo = account_repo
 
-    def create(self, data: AccountCreateDTO, user_id: int = 1):
+    def create(self, data: AccountCreateDTO, user_id: int):
         try:
             account_dict = data.model_dump()
             account_dict["user_id"] = user_id
@@ -21,7 +21,7 @@ class AccountService:
             self.session.rollback()
             raise e
     
-    def list_all(self, filters: AccountFilters, user_id: int = 1):
+    def list_all(self, filters: AccountFilters, user_id: int):
         filter_dict = filters.model_dump(exclude_none=True, exclude_unset=True)
         offset = filter_dict.pop("offset")
         limit = filter_dict.pop("limit")
@@ -32,7 +32,7 @@ class AccountService:
         )
         return [AccountResponseDTO.model_validate(account) for account in accounts]
     
-    def get(self, account_id: int, user_id: int = 1):
+    def get(self, account_id: int, user_id: int):
         account = self.account_repo.get(account_id)
         if not account:
             raise AccountNotFound
@@ -40,7 +40,7 @@ class AccountService:
             raise AccountNotFound
         return AccountResponseDTO.model_validate(account)
     
-    def update(self, account_id: int, data: AccountUpdateDTO, user_id: int = 1):
+    def update(self, account_id: int, data: AccountUpdateDTO, user_id: int):
         try:
             account = self.account_repo.get(account_id)
             if not account:
@@ -58,7 +58,7 @@ class AccountService:
             self.session.rollback()
             raise e
     
-    def delete(self, account_id: int, user_id: int = 1):
+    def delete(self, account_id: int, user_id: int):
         try:
             account = self.account_repo.get(account_id)
             if not account:

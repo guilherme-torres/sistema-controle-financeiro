@@ -22,7 +22,7 @@ class TransactionService:
         self.category_repo = category_repo
         self.account_repo = account_repo
 
-    def create(self, data: TransactionCreateDTO, user_id: int = 1):
+    def create(self, data: TransactionCreateDTO, user_id: int):
         try:
             category = self.category_repo.get(data.category_id)
             if not category or category.user_id != user_id:
@@ -48,7 +48,7 @@ class TransactionService:
             self.session.rollback()
             raise e
     
-    def list_all(self, filters: TransactionFilters, user_id: int = 1):
+    def list_all(self, filters: TransactionFilters, user_id: int):
         query_filters = {"user_id": user_id}
         if filters.category_type is not None:
             query_filters["category_type"] = filters.category_type
@@ -95,7 +95,7 @@ class TransactionService:
         )
         return [TransactionResponseDTO.model_validate(t) for t in transactions]
     
-    def get(self, transaction_id: int, user_id: int = 1):
+    def get(self, transaction_id: int, user_id: int):
         transaction = self.transaction_repo.get(transaction_id)
         if not transaction:
             raise TransactionNotFound
@@ -103,7 +103,7 @@ class TransactionService:
             raise TransactionNotFound
         return TransactionResponseDTO.model_validate(transaction)
     
-    def update(self, transaction_id: int, data: TransactionUpdateDTO, user_id: int = 1):
+    def update(self, transaction_id: int, data: TransactionUpdateDTO, user_id: int):
         try:
             original_transaction = self.transaction_repo.get(transaction_id)
             if not original_transaction or original_transaction.user_id != user_id:
@@ -150,7 +150,7 @@ class TransactionService:
             self.session.rollback()
             raise e
 
-    def delete(self, transaction_id: int, user_id: int = 1):
+    def delete(self, transaction_id: int, user_id: int):
         try:
             transaction = self.transaction_repo.get(transaction_id)
             if not transaction:

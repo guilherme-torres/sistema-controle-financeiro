@@ -9,7 +9,7 @@ class CategoryService:
         self.session = session
         self.category_repo = category_repo
 
-    def create(self, data: CategoryCreateDTO, user_id: int = 1):
+    def create(self, data: CategoryCreateDTO, user_id: int):
         try:
             category_dict = data.model_dump()
             category_dict["user_id"] = user_id
@@ -21,7 +21,7 @@ class CategoryService:
             self.session.rollback()
             raise e
     
-    def list_all(self, filters: CategoryFilters, user_id: int = 1):
+    def list_all(self, filters: CategoryFilters, user_id: int):
         filter_dict = filters.model_dump(exclude_none=True, exclude_unset=True)
         offset = filter_dict.pop("offset")
         limit = filter_dict.pop("limit")
@@ -32,7 +32,7 @@ class CategoryService:
         )
         return [CategoryResponseDTO.model_validate(category) for category in categories]
     
-    def get(self, category_id: int, user_id: int = 1):
+    def get(self, category_id: int, user_id: int):
         category = self.category_repo.get(category_id)
         if not category:
             raise CategoryNotFound
@@ -40,7 +40,7 @@ class CategoryService:
             raise CategoryNotFound
         return CategoryResponseDTO.model_validate(category)
     
-    def update(self, category_id: int, data: CategoryUpdateDTO, user_id: int = 1):
+    def update(self, category_id: int, data: CategoryUpdateDTO, user_id: int):
         try:
             category = self.category_repo.get(category_id)
             if not category:
@@ -58,7 +58,7 @@ class CategoryService:
             self.session.rollback()
             raise e
     
-    def delete(self, category_id: int, user_id: int = 1):
+    def delete(self, category_id: int, user_id: int):
         try:
             category = self.category_repo.get(category_id)
             if not category:
