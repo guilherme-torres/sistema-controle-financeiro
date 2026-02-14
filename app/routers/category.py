@@ -9,7 +9,7 @@ router = APIRouter(prefix="/categories", tags=["Category"])
 
 Service = Annotated[CategoryService, Depends(get_category_service)]
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CategoryResponseDTO, status_code=status.HTTP_201_CREATED)
 def create_category(data: CategoryCreateDTO, service: Service):
     return service.create(data)
 

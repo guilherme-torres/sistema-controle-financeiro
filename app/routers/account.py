@@ -9,7 +9,7 @@ router = APIRouter(prefix="/accounts", tags=["Account"])
 
 Service = Annotated[AccountService, Depends(get_account_service)]
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=AccountResponseDTO, status_code=status.HTTP_201_CREATED)
 def create_account(data: AccountCreateDTO, service: Service):
     return service.create(data)
 

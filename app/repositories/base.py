@@ -13,7 +13,8 @@ class BaseRepository(Generic[ModelType]):
     def create(self, data: dict) -> ModelType:
         obj = self.model(**data)
         self.session.add(obj)
-        self.session.commit()
+        # self.session.commit()
+        self.session.flush()
         self.session.refresh(obj)
         return obj
 
@@ -53,7 +54,8 @@ class BaseRepository(Generic[ModelType]):
             return None
         for key, value in data.items():
             setattr(obj, key, value)
-        self.session.commit()
+        # self.session.commit()
+        self.session.flush()
         self.session.refresh(obj)
         return obj
 
@@ -62,5 +64,6 @@ class BaseRepository(Generic[ModelType]):
         if obj is None:
             return False
         self.session.delete(obj)
-        self.session.commit()
+        # self.session.commit()
+        self.session.flush()
         return True

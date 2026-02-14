@@ -36,24 +36,26 @@ def get_transaction_repo(db: DBSession):
 
 # services
 
-def get_user_service(user_repo: Annotated[UserRepository, Depends(get_user_repo)]):
-    return UserService(user_repo)
+def get_user_service(db: DBSession, user_repo: Annotated[UserRepository, Depends(get_user_repo)]):
+    return UserService(db, user_repo)
 
 def get_auth_service(
+    db: DBSession,
     user_repo: Annotated[UserRepository, Depends(get_user_repo)],
     user_session_repo: Annotated[UserSessionRepository, Depends(get_user_session_repo)],
 ):
-    return AuthService(user_repo, user_session_repo)
+    return AuthService(db, user_repo, user_session_repo)
 
-def get_account_service(account_repo: Annotated[AccountRepository, Depends(get_account_repo)]):
-    return AccountService(account_repo)
+def get_account_service(db: DBSession, account_repo: Annotated[AccountRepository, Depends(get_account_repo)]):
+    return AccountService(db, account_repo)
 
-def get_category_service(category_repo: Annotated[CategoryRepository, Depends(get_category_repo)]):
-    return CategoryService(category_repo)
+def get_category_service(db: DBSession, category_repo: Annotated[CategoryRepository, Depends(get_category_repo)]):
+    return CategoryService(db, category_repo)
 
 def get_transaction_service(
+    db: DBSession,
     transaction_repo: Annotated[TransactionRepository, Depends(get_transaction_repo)],
     category_repo: Annotated[CategoryRepository, Depends(get_category_repo)],
     account_repo: Annotated[AccountRepository, Depends(get_account_repo)],
 ):
-    return TransactionService(transaction_repo, category_repo, account_repo)
+    return TransactionService(db, transaction_repo, category_repo, account_repo)
