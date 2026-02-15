@@ -32,7 +32,7 @@ def login(
     )
     return {"message": "Login realizado com sucesso"}
 
-@router.delete("/logout")
+@router.post("/logout")
 def logout(
     service: Service,
     response: Response,
