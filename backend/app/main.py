@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.exception_handlers import add_exception_handlers
 from app.routers.user import router as user_router
 from app.routers.auth import router as auth_router
@@ -8,6 +9,16 @@ from app.routers.transaction import router as transaction_router
 
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 add_exception_handlers(app)
 

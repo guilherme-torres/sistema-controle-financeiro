@@ -41,3 +41,7 @@ def logout(
     service.logout(auth.sid)
     response.delete_cookie("sid")
     return {"message": "Logout realizado com sucesso"}
+
+@router.get("/me")
+def me(auth: AuthData = Depends(authorize)):
+    return {"user_id": auth.user_id}
