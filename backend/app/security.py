@@ -59,6 +59,7 @@ def authorize(
         httponly=True,
         secure=True,
         samesite="lax",
-        expires=new_expires_at.strftime("%a, %d %b %Y %H:%M:%S GMT")
+        expires=new_expires_at.replace(tzinfo=timezone.utc),
+        max_age=3600,
     )
     return AuthData(user_id=user.id, sid=sid)

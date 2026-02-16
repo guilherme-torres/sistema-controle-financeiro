@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import timezone, datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from app.dependencies import get_auth_service
@@ -21,14 +21,16 @@ def login(
     expires_utc = session_data.expires_at
     if expires_utc.tzinfo is None:
         expires_utc = expires_utc.replace(tzinfo=timezone.utc)
-    cookie_expires_str = expires_utc.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    delta = expires_utc - datetime.now(timezone.utc)
+    max_age = int(delta.total_seconds())
     response.set_cookie(
         key="sid",
         value=session_data.session_id,
         httponly=True,
         secure=True,
         samesite="lax",
-        expires=cookie_expires_str
+        expires=expires_utc,
+        max_age=max_age,
     )
     return {"message": "Login realizado com sucesso"}
 

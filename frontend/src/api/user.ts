@@ -3,7 +3,7 @@ import type { UserCreate } from "@/models/user";
 
 export async function createUser(data: UserCreate) {
     try {
-        await api.post("/users", data)
+        await api.post("/users/", data)
     } catch (error: any) {
         const errorMessage = error.response?.data?.message || "Erro ao criar usuário";
         throw new Error(errorMessage)
