@@ -4,7 +4,7 @@ export async function getAuthenticatedUser() {
     try {
         const response = await api.get("/auth/me")
         return response.data
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 401) {
             console.log("Sessão inválida ou expirada")
             return null
@@ -20,8 +20,8 @@ export async function login(email: string, password: string) {
             email, password
         })
         return data
-    } catch (error) {
-        const errorMessage = (error as any).response?.data?.message || "Erro ao fazer login";
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || "Erro ao fazer login";
         throw new Error(errorMessage)
     }
 }
@@ -30,8 +30,8 @@ export async function logout() {
     try {
         const { data } = await api.post("/auth/logout")
         return data
-    } catch (error) {
-        const errorMessage = (error as any).response?.data?.message || "Erro ao fazer logout";
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || "Erro ao fazer logout";
         throw new Error(errorMessage)
     }
 }

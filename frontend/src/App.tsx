@@ -23,7 +23,7 @@ function App() {
       <RouterProvider router={router} />
       <TanStackRouterDevtools router={router} />
       <ReactQueryDevtools client={queryClient} />
-      <Toaster richColors={true} />
+      <Toaster richColors={true} position="top-center" theme="light" />
     </QueryClientProvider>
   )
 }
