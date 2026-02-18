@@ -21,10 +21,10 @@ class CategoryResponseDTO(CategoryBase):
 
 class CategoryUpdateDTO(BaseModel):
     name: Optional[str] = None
-    category_type: Optional[CategoryType] = None
     color: Optional[str] = None
 
 
 class CategoryFilters(BaseModel):
     offset: int = Field(0, ge=0)
     limit: int = Field(10, ge=1)
+    category_type: Optional[CategoryType] = None

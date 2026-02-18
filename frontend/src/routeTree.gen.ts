@@ -9,19 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
+import { Route as ProtectedContasRouteImport } from './routes/_protected/contas'
+import { Route as ProtectedCategoriasRouteImport } from './routes/_protected/categorias'
 
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -33,52 +35,75 @@ const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedContasRoute = ProtectedContasRouteImport.update({
+  id: '/contas',
+  path: '/contas',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedCategoriasRoute = ProtectedCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
+  '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/categorias': typeof ProtectedCategoriasRoute
+  '/contas': typeof ProtectedContasRoute
 }
 export interface FileRoutesByTo {
+  '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/categorias': typeof ProtectedCategoriasRoute
+  '/contas': typeof ProtectedContasRoute
   '/': typeof ProtectedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
+  '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/_protected/categorias': typeof ProtectedCategoriasRoute
+  '/_protected/contas': typeof ProtectedContasRoute
   '/_protected/': typeof ProtectedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths: '/' | '/cadastro' | '/login' | '/categorias' | '/contas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/'
-  id: '__root__' | '/_protected' | '/login' | '/register' | '/_protected/'
+  to: '/cadastro' | '/login' | '/categorias' | '/contas' | '/'
+  id:
+    | '__root__'
+    | '/_protected'
+    | '/cadastro'
+    | '/login'
+    | '/_protected/categorias'
+    | '/_protected/contas'
+    | '/_protected/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  CadastroRoute: typeof CadastroRoute
   LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected': {
@@ -95,14 +120,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/contas': {
+      id: '/_protected/contas'
+      path: '/contas'
+      fullPath: '/contas'
+      preLoaderRoute: typeof ProtectedContasRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/categorias': {
+      id: '/_protected/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof ProtectedCategoriasRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
+  ProtectedCategoriasRoute: typeof ProtectedCategoriasRoute
+  ProtectedContasRoute: typeof ProtectedContasRoute
   ProtectedIndexRoute: typeof ProtectedIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedCategoriasRoute: ProtectedCategoriasRoute,
+  ProtectedContasRoute: ProtectedContasRoute,
   ProtectedIndexRoute: ProtectedIndexRoute,
 }
 
@@ -112,8 +155,8 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
+  CadastroRoute: CadastroRoute,
   LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

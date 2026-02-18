@@ -45,7 +45,7 @@ export function Layout({ title, children }: { title?: string, children: React.Re
                         <LogOut />Sair
                     </Button>
                 </header>
-                <div className="flex flex-1 p-3">
+                <div className="flex flex-col flex-1 p-3">
                     {children}
                 </div>
             </SidebarInset>

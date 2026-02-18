@@ -23,13 +23,13 @@ const items = [
     },
     {
         title: "Contas",
-        url: "/",
+        url: "/contas",
         icon: Wallet,
         isActive: false,
     },
     {
         title: "Categorias",
-        url: "/",
+        url: "/categorias",
         icon: Tags,
         isActive: false,
     },

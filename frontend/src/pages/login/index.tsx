@@ -36,7 +36,7 @@ export function LoginPage() {
                 <CardHeader>
                     <CardTitle className="text-2xl">Entrar</CardTitle>
                     <CardAction>
-                        <Link to="/register" className="hover:underline">
+                        <Link to="/cadastro" className="hover:underline">
                             Criar conta
                         </Link>
                     </CardAction>
