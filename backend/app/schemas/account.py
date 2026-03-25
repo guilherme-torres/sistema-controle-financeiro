@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -17,6 +17,11 @@ class AccountResponseDTO(AccountBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AccountResponseWithTotal(BaseModel):
+    total: Decimal = Field(max_digits=10, decimal_places=2)
+    accounts: List[AccountResponseDTO]
 
 
 class AccountUpdateDTO(BaseModel):

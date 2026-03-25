@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.exceptions.account import AccountNotFound
 from app.repositories.account import AccountRepository
-from app.schemas.account import AccountCreateDTO, AccountFilters, AccountResponseDTO, AccountUpdateDTO
+from app.schemas.account import AccountCreateDTO, AccountFilters, AccountResponseDTO, AccountResponseWithTotal, AccountUpdateDTO
 
 
 class AccountService:
@@ -30,7 +30,11 @@ class AccountService:
             limit=limit,
             filter_by={"user_id": user_id, **filter_dict},
         )
-        return [AccountResponseDTO.model_validate(account) for account in accounts]
+        total = sum([account.balance for account in accounts])
+        return AccountResponseWithTotal(
+            total=total,
+            accounts=[AccountResponseDTO.model_validate(account) for account in accounts]
+        )
     
     def get(self, account_id: int, user_id: int):
         account = self.account_repo.get(account_id)

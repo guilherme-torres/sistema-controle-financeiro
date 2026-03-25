@@ -2,19 +2,29 @@ import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { ColorPicker } from "@/components/color-picker"
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { formatCurrency } from "@/lib/utils"
-import { Wallet, Trash2, PlusCircle } from "lucide-react"
+import { Wallet, Trash2, PlusCircle, Pencil } from "lucide-react"
 import {
     listAccounts,
     createAccount,
@@ -23,10 +33,14 @@ import {
 } from "@/api/account"
 import { toast } from "sonner"
 import type { AccountResponse } from "@/models/account"
+import { EmptyData } from "@/components/empty-data"
+import { Field, FieldGroup } from "@/components/ui/field"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 export function AccountsPage() {
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isCreateOpen, setIsCreateOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountResponse | null>(null)
     const [formData, setFormData] = useState({
         name: "",
@@ -35,7 +49,7 @@ export function AccountsPage() {
     })
     const queryClient = useQueryClient()
 
-    const { data: accounts = [], isLoading } = useQuery({
+    const { data: accountsData, isLoading } = useQuery({
         queryKey: ["accounts"],
         queryFn: () => listAccounts(),
     })
@@ -44,7 +58,7 @@ export function AccountsPage() {
         mutationFn: createAccount,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
-            setIsCreateDialogOpen(false)
+            setIsCreateOpen(false)
             setFormData({ name: "", balance: "", color: "#7b32a8" })
             toast.success("Conta criada com sucesso!")
         },
@@ -58,7 +72,7 @@ export function AccountsPage() {
             updateAccount(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
-            setIsEditDialogOpen(false)
+            setIsEditOpen(false)
             setSelectedAccount(null)
             setFormData({ name: "", balance: "", color: "#7b32a8" })
             toast.success("Conta atualizada com sucesso!")
@@ -72,7 +86,7 @@ export function AccountsPage() {
         mutationFn: deleteAccount,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
-            setIsEditDialogOpen(false)
+            setIsEditOpen(false)
             setSelectedAccount(null)
             toast.success("Conta deletada com sucesso!")
         },
@@ -81,19 +95,19 @@ export function AccountsPage() {
         },
     })
 
-    const handleOpenCreateDialog = () => {
+    const handleOpenCreate = () => {
         setFormData({ name: "", balance: "", color: "#7b32a8" })
-        setIsCreateDialogOpen(true)
+        setIsCreateOpen(true)
     }
 
-    const handleOpenEditDialog = (account: AccountResponse) => {
+    const handleOpenEdit = (account: AccountResponse) => {
         setSelectedAccount(account)
         setFormData({
             name: account.name,
             balance: account.balance,
             color: account.color,
         })
-        setIsEditDialogOpen(true)
+        setIsEditOpen(true)
     }
 
     const handleCreateSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -115,251 +129,157 @@ export function AccountsPage() {
         updateMutation.mutate({ id: selectedAccount.id, data: formData })
     }
 
-    const handleDelete = () => {
-        if (!selectedAccount) return
-        deleteMutation.mutate(selectedAccount.id)
+    const handleDelete = (accountId: number) => {
+        deleteMutation.mutate(accountId)
     }
-
-    const totalBalance = accounts.reduce(
-        (sum, acc) => sum + parseFloat(acc.balance),
-        0
-    )
 
     if (isLoading) {
         return (
             <Layout title="Contas">
-                <div className="w-full space-y-12">
-                    <div className="h-32 bg-primary/10 rounded-2xl animate-pulse"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[1, 2, 3].map((i) => (
-                            <div
-                                key={i}
-                                className="h-48 bg-card/50 rounded-xl animate-pulse"
-                            ></div>
-                        ))}
-                    </div>
-                </div>
+                carregando...
             </Layout>
         )
     }
 
-    return (
+    return accountsData && (
         <Layout title="Contas">
-            <div className="w-full space-y-12">
-                <div className="relative overflow-hidden rounded-2xl bg-primary/10 border border-primary/20 p-8 backdrop-blur-sm">
-                    <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <p className="text-foreground/70 text-sm font-medium uppercase tracking-wide">
-                                    Saldo Total
-                                </p>
-                                <p className="text-5xl font-bold from-primary text-primary mt-2">
-                                    {formatCurrency(totalBalance.toFixed(2))}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="pt-4 border-t border-primary/20">
-                            <p className="text-foreground/60 text-sm">
-                                {accounts.length} contas ativas
-                            </p>
-                        </div>
+            <div>
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
+                    <div>
+                        <h1 className="font-bold text-2xl">Minhas contas</h1>
+                        <span>Total: {formatCurrency(accountsData.total)}</span>
                     </div>
+                    {accountsData.accounts.length > 0 &&
+                        <Button
+                            className="w-full mt-3 sm:w-50 sm:mt-0"
+                            onClick={handleOpenCreate}
+                        >
+                            <PlusCircle />
+                            Adicionar conta
+                        </Button>}
                 </div>
-
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-foreground px-1">
-                            Contas
-                        </h2>
-                        {accounts.length > 0 &&
-                            <Button onClick={() => setIsCreateDialogOpen(true)}>
+                {accountsData.accounts.length === 0 ?
+                    <div className="border-2 border-dashed rounded-md">
+                        <EmptyData
+                            icon={<Wallet />}
+                            title="Nenhuma conta cadastrada"
+                            description="Clique no botão abaixo para cadastrar uma nova conta"
+                        >
+                            <Button onClick={handleOpenCreate}>
                                 <PlusCircle />
                                 Adicionar conta
                             </Button>
-                        }
+                        </EmptyData>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {accounts.map((account) => (
-                            <div
-                                key={account.id}
-                                onClick={() => handleOpenEditDialog(account)}
-                                className="cursor-pointer rounded-xl border border-border/50 bg-card/50 overflow-hidden transition-all duration-300 hover:border-primary/50 hover:bg-card/80 hover:shadow-lg hover:-translate-y-1"
-                            >
-                                <div className="p-6">
-                                    <div className="flex items-start justify-between mb-8">
-                                        <div>
-                                            <p className="text-foreground/60 text-sm font-medium mb-1">
-                                                Conta
-                                            </p>
-                                            <h3 className="text-lg font-semibold text-foreground">
-                                                {account.name}
-                                            </h3>
-                                        </div>
-                                        <div
-                                            className="p-3 rounded-lg text-white shadow-lg"
-                                            style={{ backgroundColor: account.color }}
-                                        >
-                                            <Wallet size={24} />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-foreground/60 text-xs font-medium uppercase mb-1">
-                                            Saldo
-                                        </p>
-                                        <p className="text-3xl font-bold text-foreground">
-                                            {formatCurrency(account.balance)}
-                                        </p>
-                                    </div>
+                    :
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+                        {accountsData.accounts.map(account => (
+                            <div key={account.id} className="bg-white p-4 shadow-md rounded-md">
+                                <div className="pl-2" style={{
+                                    borderLeft: `10px solid ${account.color}`
+                                }}>
+                                    <h1 className="text-lg font-bold">{account.name}</h1>
+                                    <span className="text-sm">{formatCurrency(account.balance)}</span>
+                                </div>
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="hover:bg-neutral-50/15"
+                                        onClick={() => handleOpenEdit(account)}
+                                    >
+                                        <Pencil />
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                            >
+                                                <Trash2 />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Tem certeza que deseja excluir esta conta?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as transações desta conta.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    variant="destructive"
+                                                    onClick={() => handleDelete(account.id)}
+                                                >
+                                                    Excluir
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-                {accounts.length < 1 &&
-                    <div
-                        onClick={handleOpenCreateDialog}
-                        className="rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 p-8 flex flex-col items-center justify-center gap-4 cursor-pointer transition-colors hover:bg-primary/5"
-                    >
-                        <div className="p-4 bg-primary/10 rounded-full">
-                            <Wallet className="text-primary" size={24} />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-foreground font-semibold mb-1">
-                                Adicionar Nova Conta
-                            </p>
-                            <p className="text-foreground/60 text-sm">
-                                Clique para cadastrar uma nova conta
-                            </p>
-                        </div>
-                    </div>
                 }
             </div>
 
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogContent className="sm:max-w-100">
-                    <DialogHeader>
-                        <DialogTitle>Adicionar Nova Conta</DialogTitle>
-                        <DialogDescription>
-                            Preencha os dados abaixo para criar uma nova conta
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Nome da Conta</Label>
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, name: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="balance">Saldo</Label>
-                            <Input
-                                id="balance"
-                                placeholder="0.00"
-                                type="number"
-                                step="0.01"
-                                value={formData.balance}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, balance: e.target.value })
-                                }
-                            />
-                        </div>
-                        <ColorPicker
-                            value={formData.color}
-                            onChange={(color) =>
-                                setFormData({ ...formData, color })
-                            }
-                        />
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <form>
+                    <DialogContent className="sm:max-w-sm">
+                        <DialogHeader>
+                            <DialogTitle>Nova conta</DialogTitle>
+                            <DialogDescription>
+                                Adicione uma nova conta.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <FieldGroup>
+                            <Field>
+                                <Label htmlFor="name">Nome</Label>
+                                <Input id="name" name="name" />
+                            </Field>
+                            <Field>
+                                <Label htmlFor="balance">Saldo</Label>
+                                <Input id="balance" name="balance" />
+                            </Field>
+                        </FieldGroup>
                         <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsCreateDialogOpen(false)}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={createMutation.isPending}
-                            >
-                                {createMutation.isPending ? "Criando..." : "Criar Conta"}
-                            </Button>
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancelar</Button>
+                            </DialogClose>
+                            <Button type="submit">Salvar</Button>
                         </DialogFooter>
-                    </form>
-                </DialogContent>
+                    </DialogContent>
+                </form>
             </Dialog>
 
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-100">
-                    <DialogHeader>
-                        <DialogTitle>Editar Conta</DialogTitle>
-                        <DialogDescription>
-                            Modifique os dados da conta ou delete-a
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleEditSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-name">Nome da Conta</Label>
-                            <Input
-                                id="edit-name"
-                                value={formData.name}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, name: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-balance">Saldo</Label>
-                            <Input
-                                id="edit-balance"
-                                placeholder="0.00"
-                                type="number"
-                                step="0.01"
-                                value={formData.balance}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, balance: e.target.value })
-                                }
-                            />
-                        </div>
-                        <ColorPicker
-                            value={formData.color}
-                            onChange={(color) =>
-                                setFormData({ ...formData, color })
-                            }
-                        />
-                        <DialogFooter className="flex gap-2 sm:justify-between">
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                disabled={deleteMutation.isPending}
-                                onClick={handleDelete}
-                                className="mr-auto"
-                            >
-                                <Trash2 size={16} className="mr-2" />
-                                {deleteMutation.isPending ? "Deletando..." : "Deletar"}
-                            </Button>
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsEditDialogOpen(false)}
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={updateMutation.isPending}
-                                >
-                                    {updateMutation.isPending ? "Salvando..." : "Salvar"}
-                                </Button>
-                            </div>
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <form>
+                    <DialogContent className="sm:max-w-sm">
+                        <DialogHeader>
+                            <DialogTitle>Editar conta: {selectedAccount?.name}</DialogTitle>
+                            <DialogDescription>
+                                Edite os dados da conta.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <FieldGroup>
+                            <Field>
+                                <Label htmlFor="name">Nome</Label>
+                                <Input id="name" name="name" defaultValue={selectedAccount?.name} />
+                            </Field>
+                            <Field>
+                                <Label htmlFor="balance">Saldo</Label>
+                                <Input id="balance" name="balance" />
+                            </Field>
+                        </FieldGroup>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancelar</Button>
+                            </DialogClose>
+                            <Button type="submit">Salvar</Button>
                         </DialogFooter>
-                    </form>
-                </DialogContent>
+                    </DialogContent>
+                </form>
             </Dialog>
         </Layout>
     )

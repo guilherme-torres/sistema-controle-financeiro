@@ -2,7 +2,13 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Query, status
 from app.dependencies import get_transaction_service
 from app.schemas.auth import AuthData
-from app.schemas.transaction import TransactionCreateDTO, TransactionFilters, TransactionResponseDTO, TransactionSummaryDTO, TransactionUpdateDTO
+from app.schemas.transaction import (
+    TransactionCreateDTO,
+    TransactionFilters,
+    TransactionResponseDTO,
+    TransactionSummaryWithTotal,
+    TransactionUpdateDTO
+)
 from app.security import authorize
 from app.services.transaction import TransactionService
 
@@ -19,7 +25,7 @@ def create_transaction(
 ):
     return service.create(data, auth.user_id)
 
-@router.get("/", response_model=List[TransactionResponseDTO] | List[TransactionSummaryDTO])
+@router.get("/", response_model=List[TransactionResponseDTO] | TransactionSummaryWithTotal)
 def list_transactions(
     filters: Annotated[TransactionFilters, Query()],
     service: Service,

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { AccountCreate, AccountResponse, AccountUpdate } from "@/models/account";
+import type { AccountCreate, AccountResponse, AccountResponseWithTotal, AccountUpdate } from "@/models/account";
 
 export async function createAccount(data: AccountCreate) {
     try {
@@ -23,7 +23,7 @@ export async function getAccount(id: number) {
 
 export async function listAccounts(offset: number = 0, limit: number = 10) {
     try {
-        const response = await api.get<AccountResponse[]>(`/accounts/`, {
+        const response = await api.get<AccountResponseWithTotal>(`/accounts/`, {
             params: { limit, offset }
         })
         return response.data

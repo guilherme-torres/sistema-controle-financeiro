@@ -11,6 +11,11 @@ export interface AccountResponse {
     color: string
 }
 
+export interface AccountResponseWithTotal {
+    total: string
+    accounts: AccountResponse[]
+}
+
 export interface AccountUpdate {
     name?: string
     balance?: string

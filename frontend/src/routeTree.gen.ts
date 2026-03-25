@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
+import { Route as ProtectedTransacoesRouteImport } from './routes/_protected/transacoes'
 import { Route as ProtectedContasRouteImport } from './routes/_protected/contas'
 import { Route as ProtectedCategoriasRouteImport } from './routes/_protected/categorias'
 
@@ -35,6 +36,11 @@ const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedTransacoesRoute = ProtectedTransacoesRouteImport.update({
+  id: '/transacoes',
+  path: '/transacoes',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedContasRoute = ProtectedContasRouteImport.update({
   id: '/contas',
   path: '/contas',
@@ -52,12 +58,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/categorias': typeof ProtectedCategoriasRoute
   '/contas': typeof ProtectedContasRoute
+  '/transacoes': typeof ProtectedTransacoesRoute
 }
 export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/categorias': typeof ProtectedCategoriasRoute
   '/contas': typeof ProtectedContasRoute
+  '/transacoes': typeof ProtectedTransacoesRoute
   '/': typeof ProtectedIndexRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_protected/categorias': typeof ProtectedCategoriasRoute
   '/_protected/contas': typeof ProtectedContasRoute
+  '/_protected/transacoes': typeof ProtectedTransacoesRoute
   '/_protected/': typeof ProtectedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cadastro' | '/login' | '/categorias' | '/contas'
+  fullPaths:
+    | '/'
+    | '/cadastro'
+    | '/login'
+    | '/categorias'
+    | '/contas'
+    | '/transacoes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/cadastro' | '/login' | '/categorias' | '/contas' | '/'
+  to: '/cadastro' | '/login' | '/categorias' | '/contas' | '/transacoes' | '/'
   id:
     | '__root__'
     | '/_protected'
@@ -81,6 +96,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_protected/categorias'
     | '/_protected/contas'
+    | '/_protected/transacoes'
     | '/_protected/'
   fileRoutesById: FileRoutesById
 }
@@ -120,6 +136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/transacoes': {
+      id: '/_protected/transacoes'
+      path: '/transacoes'
+      fullPath: '/transacoes'
+      preLoaderRoute: typeof ProtectedTransacoesRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/contas': {
       id: '/_protected/contas'
       path: '/contas'
@@ -140,12 +163,14 @@ declare module '@tanstack/react-router' {
 interface ProtectedRouteChildren {
   ProtectedCategoriasRoute: typeof ProtectedCategoriasRoute
   ProtectedContasRoute: typeof ProtectedContasRoute
+  ProtectedTransacoesRoute: typeof ProtectedTransacoesRoute
   ProtectedIndexRoute: typeof ProtectedIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedCategoriasRoute: ProtectedCategoriasRoute,
   ProtectedContasRoute: ProtectedContasRoute,
+  ProtectedTransacoesRoute: ProtectedTransacoesRoute,
   ProtectedIndexRoute: ProtectedIndexRoute,
 }
 

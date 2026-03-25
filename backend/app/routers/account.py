@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, Query, status
 from app.dependencies import get_account_service
-from app.schemas.account import AccountCreateDTO, AccountFilters, AccountResponseDTO, AccountUpdateDTO
+from app.schemas.account import AccountCreateDTO, AccountFilters, AccountResponseDTO, AccountResponseWithTotal, AccountUpdateDTO
 from app.schemas.auth import AuthData
 from app.security import authorize
 from app.services.account import AccountService
@@ -19,7 +19,7 @@ def create_account(
 ):
     return service.create(data, auth.user_id)
 
-@router.get("/", response_model=List[AccountResponseDTO])
+@router.get("/", response_model=AccountResponseWithTotal)
 def list_accounts(
     filters: Annotated[AccountFilters, Query()],
     service: Service,

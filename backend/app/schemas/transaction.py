@@ -21,6 +21,7 @@ class TransactionCreateDTO(TransactionBase):
 
 class TransactionResponseDTO(TransactionBase):
     id: int
+    comment: Optional[str]
     category_type: CategoryType
     category: CategoryResponseDTO
     account: AccountResponseDTO
@@ -59,5 +60,10 @@ class TransactionSummaryDTO(BaseModel):
     category_id: int
     category_name: str
     category_type: CategoryType
+    category_color: str
     total_amount: float
     percentage: float
+
+class TransactionSummaryWithTotal(BaseModel):
+    total: float
+    summary: List[TransactionSummaryDTO]

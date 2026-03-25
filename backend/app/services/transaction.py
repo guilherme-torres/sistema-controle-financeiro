@@ -6,7 +6,7 @@ from app.models.category import CategoryType
 from app.repositories.account import AccountRepository
 from app.repositories.category import CategoryRepository
 from app.repositories.transaction import TransactionRepository
-from app.schemas.transaction import TransactionCreateDTO, TransactionFilters, TransactionResponseDTO, TransactionSummaryDTO, TransactionUpdateDTO
+from app.schemas.transaction import TransactionCreateDTO, TransactionFilters, TransactionResponseDTO, TransactionSummaryDTO, TransactionSummaryWithTotal, TransactionUpdateDTO
 
 
 class TransactionService:
@@ -76,11 +76,15 @@ class TransactionService:
                     category_id=category.id,
                     category_name=category.name,
                     category_type=category.category_type,
+                    category_color=category.color,
                     total_amount=total,
                     percentage=round(percent, 2)
                 )
                 summary_list.append(dto)
-            return summary_list
+            return TransactionSummaryWithTotal(
+                total=grand_total,
+                summary=summary_list,
+            )
         query_order = {}
         if filters.order_by:
             field_name, direction = filters.order_by.value.split(":")

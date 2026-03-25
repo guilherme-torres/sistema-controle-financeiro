@@ -1,5 +1,5 @@
 import * as React from "react"
-import { LayoutDashboard, Wallet, Tags } from "lucide-react"
+import { LayoutDashboard, Wallet, Tags, icons, Banknote } from "lucide-react"
 
 import {
     Sidebar,
@@ -19,6 +19,12 @@ const items = [
         title: "Dashboard",
         url: "/",
         icon: LayoutDashboard,
+        isActive: false,
+    },
+    {
+        title: "Transações",
+        url: "/transacoes",
+        icon: Banknote,
         isActive: false,
     },
     {
