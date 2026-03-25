@@ -45,7 +45,7 @@ export function AccountsPage() {
     const [formData, setFormData] = useState({
         name: "",
         balance: "",
-        color: "#7b32a8",
+        color: "#e53935",
     })
     const queryClient = useQueryClient()
 
@@ -59,7 +59,7 @@ export function AccountsPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
             setIsCreateOpen(false)
-            setFormData({ name: "", balance: "", color: "#7b32a8" })
+            setFormData({ name: "", balance: "", color: "#e53935" })
             toast.success("Conta criada com sucesso!")
         },
         onError: (error) => {
@@ -74,7 +74,7 @@ export function AccountsPage() {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
             setIsEditOpen(false)
             setSelectedAccount(null)
-            setFormData({ name: "", balance: "", color: "#7b32a8" })
+            setFormData({ name: "", balance: "", color: "#e53935" })
             toast.success("Conta atualizada com sucesso!")
         },
         onError: (error) => {
@@ -96,7 +96,7 @@ export function AccountsPage() {
     })
 
     const handleOpenCreate = () => {
-        setFormData({ name: "", balance: "", color: "#7b32a8" })
+        setFormData({ name: "", balance: "", color: "#e53935" })
         setIsCreateOpen(true)
     }
 
@@ -110,7 +110,7 @@ export function AccountsPage() {
         setIsEditOpen(true)
     }
 
-    const handleCreateSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleCreate = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!formData.name.trim() || !formData.balance.trim()) {
             toast.error("Preencha todos os campos!")
@@ -119,7 +119,7 @@ export function AccountsPage() {
         createMutation.mutate(formData)
     }
 
-    const handleEditSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleEdit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!selectedAccount) return
         if (!formData.name.trim() || !formData.balance.trim()) {
@@ -225,22 +225,61 @@ export function AccountsPage() {
             </div>
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <form>
-                    <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                            <DialogTitle>Nova conta</DialogTitle>
-                            <DialogDescription>
-                                Adicione uma nova conta.
-                            </DialogDescription>
-                        </DialogHeader>
+                <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Nova conta</DialogTitle>
+                        <DialogDescription>
+                            Adicione uma nova conta.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleCreate} className="space-y-4">
                         <FieldGroup>
                             <Field>
                                 <Label htmlFor="name">Nome</Label>
-                                <Input id="name" name="name" />
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        name: e.target.value
+                                    })}
+                                />
                             </Field>
                             <Field>
-                                <Label htmlFor="balance">Saldo</Label>
-                                <Input id="balance" name="balance" />
+                                <div className="w-full max-w-sm space-y-2">
+                                    <Label htmlFor="amount">Saldo</Label>
+                                    <div className="relative">
+                                        <span
+                                            className="absolute left-3 top-1 text-muted-foreground font-medium select-none pointer-events-none"
+                                            aria-hidden="true"
+                                        >
+                                            R$
+                                        </span>
+                                        <Input
+                                            className="bg-background pl-9"
+                                            id="amount"
+                                            name="amount"
+                                            min="0"
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            type="number"
+                                            value={formData.balance}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                balance: e.target.value
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
+                            <Field>
+                                <ColorPicker
+                                    value={formData.color}
+                                    onChange={(color) => setFormData({
+                                        ...formData,
+                                        color
+                                    })} />
                             </Field>
                         </FieldGroup>
                         <DialogFooter>
@@ -249,27 +288,66 @@ export function AccountsPage() {
                             </DialogClose>
                             <Button type="submit">Salvar</Button>
                         </DialogFooter>
-                    </DialogContent>
-                </form>
+                    </form>
+                </DialogContent>
             </Dialog>
 
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <form>
-                    <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                            <DialogTitle>Editar conta: {selectedAccount?.name}</DialogTitle>
-                            <DialogDescription>
-                                Edite os dados da conta.
-                            </DialogDescription>
-                        </DialogHeader>
+                <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Editar conta: {formData.name}</DialogTitle>
+                        <DialogDescription>
+                            Edite os dados desta conta.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleEdit} className="space-y-4">
                         <FieldGroup>
                             <Field>
                                 <Label htmlFor="name">Nome</Label>
-                                <Input id="name" name="name" defaultValue={selectedAccount?.name} />
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        name: e.target.value
+                                    })}
+                                />
                             </Field>
                             <Field>
-                                <Label htmlFor="balance">Saldo</Label>
-                                <Input id="balance" name="balance" />
+                                <div className="w-full max-w-sm space-y-2">
+                                    <Label htmlFor="amount">Saldo</Label>
+                                    <div className="relative">
+                                        <span
+                                            className="absolute left-3 top-1 text-muted-foreground font-medium select-none pointer-events-none"
+                                            aria-hidden="true"
+                                        >
+                                            R$
+                                        </span>
+                                        <Input
+                                            className="bg-background pl-9"
+                                            id="amount"
+                                            name="amount"
+                                            min="0"
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            type="number"
+                                            value={formData.balance}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                balance: e.target.value
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
+                            <Field>
+                                <ColorPicker
+                                    value={formData.color as string}
+                                    onChange={(color) => setFormData({
+                                        ...formData,
+                                        color
+                                    })} />
                             </Field>
                         </FieldGroup>
                         <DialogFooter>
@@ -278,8 +356,8 @@ export function AccountsPage() {
                             </DialogClose>
                             <Button type="submit">Salvar</Button>
                         </DialogFooter>
-                    </DialogContent>
-                </form>
+                    </form>
+                </DialogContent>
             </Dialog>
         </Layout>
     )
