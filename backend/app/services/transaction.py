@@ -6,7 +6,7 @@ from app.models.category import CategoryType
 from app.repositories.account import AccountRepository
 from app.repositories.category import CategoryRepository
 from app.repositories.transaction import TransactionRepository
-from app.schemas.transaction import TransactionCreateDTO, TransactionFilters, TransactionResponseDTO, TransactionSummaryDTO, TransactionSummaryWithTotal, TransactionUpdateDTO
+from app.schemas.transaction import TransactionCreateDTO, TransactionFilters, TransactionResponseDTO, TransactionResponsePagination, TransactionSummaryDTO, TransactionSummaryWithTotal, TransactionUpdateDTO
 
 
 class TransactionService:
@@ -97,7 +97,16 @@ class TransactionService:
             filter_by=query_filters,
             order_by=query_order
         )
-        return [TransactionResponseDTO.model_validate(t) for t in transactions]
+        # return [TransactionResponseDTO.model_validate(t) for t in transactions]
+        total = self.transaction_repo.count_rows(query_filters)
+        if total is None:
+            total = 0
+        return TransactionResponsePagination(
+            data=[TransactionResponseDTO.model_validate(t) for t in transactions],
+            total=total,
+            limit=filters.limit,
+            offset=filters.offset,
+        )
     
     def get(self, transaction_id: int, user_id: int):
         transaction = self.transaction_repo.get(transaction_id)

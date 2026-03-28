@@ -9,6 +9,7 @@ class BaseRepository(Generic[ModelType]):
     def __init__(self, model: Type[ModelType], session: Session):
         self.model = model
         self.session = session
+        self.model_columns = {column.name for column in self.model.__table__.columns}
 
     def create(self, data: dict) -> ModelType:
         obj = self.model(**data)
@@ -25,18 +26,17 @@ class BaseRepository(Generic[ModelType]):
         filter_by: Optional[Dict[str, Any]] = None,
         order_by: Optional[Dict[str, str]] = None
     ) -> Sequence[ModelType]:
-        model_columns = {column.name for column in self.model.__table__.columns}
         query = select(self.model)
         if filter_by:
             for key, value in filter_by.items():
-                if key in model_columns:
+                if key in self.model_columns:
                     if isinstance(value, list):
                         query = query.where(getattr(self.model, key).in_(value))
                     else:
                         query = query.where(getattr(self.model, key) == value)
         if order_by:
             for column, direction in order_by.items():
-                if column in model_columns:
+                if column in self.model_columns:
                     if direction.lower() == 'desc':
                         query = query.order_by(getattr(self.model, column).desc())
                     else:

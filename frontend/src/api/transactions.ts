@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { TransactionCreate, TransactionFilters, TransactionResponse, TransactionSummaryResponseWithTotal, TransactionUpdate } from "@/models/transactions";
+import type { TransactionCreate, TransactionFilters, TransactionResponse, TransactionResponsePagination, TransactionSummaryResponseWithTotal, TransactionUpdate } from "@/models/transactions";
 
 export async function listTransactionsSummary(filters: TransactionFilters) {
     try {
@@ -15,7 +15,7 @@ export async function listTransactionsSummary(filters: TransactionFilters) {
 
 export async function listTransactions(filters: TransactionFilters) {
     try {
-        const response = await api.get<TransactionResponse[]>(`/transactions/`, {
+        const response = await api.get<TransactionResponsePagination>(`/transactions/`, {
             params: { ...filters }
         })
         return response.data

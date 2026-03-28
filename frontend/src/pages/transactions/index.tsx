@@ -34,6 +34,8 @@ import { Combobox } from "@/components/combobox"
 import { DatePicker } from "@/components/date-picker"
 import { listAccounts } from "@/api/account"
 import { Textarea } from "@/components/ui/textarea"
+import { DataTable } from "./components/data-table/data-table"
+import { columns } from "./components/data-table/columns"
 
 interface FormData {
     amount: string
@@ -60,7 +62,7 @@ export function TransactionsPage() {
 
     const queryClient = useQueryClient()
 
-    const { data: transactions = [], isLoading } = useQuery({
+    const { data: transactions = { total: 0, limit: 0, offset: 0, data: [] }, isLoading } = useQuery({
         queryKey: ["transactions", filters],
         queryFn: () => listTransactions(filters),
     })
@@ -135,7 +137,7 @@ export function TransactionsPage() {
         <Layout title="Transações">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
                 <h1 className="font-bold text-2xl">Minhas transações</h1>
-                {transactions.length > 0 &&
+                {transactions.total > 0 &&
                     <Button
                         className="w-full mt-3 sm:w-50 sm:mt-0"
                         onClick={handleOpenCreate}
@@ -145,7 +147,7 @@ export function TransactionsPage() {
                     </Button>}
             </div>
 
-            {transactions.length === 0 ?
+            {transactions.total === 0 ?
                 <div className="border-2 border-dashed rounded-md">
                     <EmptyData
                         icon={<Banknote />}
@@ -159,13 +161,7 @@ export function TransactionsPage() {
                     </EmptyData>
                 </div>
                 :
-                <div className="space-y-3">
-                    {transactions.map(transaction => (
-                        <div key={transaction.id}>
-                            {JSON.stringify(transaction)}
-                        </div>
-                    ))}
-                </div>
+                <DataTable columns={columns} data={transactions.data} />
             }
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

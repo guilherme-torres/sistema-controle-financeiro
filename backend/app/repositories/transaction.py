@@ -31,6 +31,12 @@ class TransactionRepository(BaseRepository):
                 else:
                     query = query.where(getattr(self.model, key) == value)
         return query
+    
+    def count_rows(self, filter_by: Optional[Dict[str, Any]] = None):
+        query = select(func.count(self.model.id))
+        query = self._apply_filters(query, filter_by)
+        result = self.session.execute(query)
+        return result.scalar()
 
     def list_all(
         self,

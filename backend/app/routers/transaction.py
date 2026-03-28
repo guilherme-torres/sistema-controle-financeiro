@@ -6,6 +6,7 @@ from app.schemas.transaction import (
     TransactionCreateDTO,
     TransactionFilters,
     TransactionResponseDTO,
+    TransactionResponsePagination,
     TransactionSummaryWithTotal,
     TransactionUpdateDTO
 )
@@ -25,7 +26,7 @@ def create_transaction(
 ):
     return service.create(data, auth.user_id)
 
-@router.get("/", response_model=List[TransactionResponseDTO] | TransactionSummaryWithTotal)
+@router.get("/", response_model=TransactionResponsePagination | TransactionSummaryWithTotal)
 def list_transactions(
     filters: Annotated[TransactionFilters, Query()],
     service: Service,

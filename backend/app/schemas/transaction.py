@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.models.category import CategoryType
 from app.schemas.account import AccountResponseDTO
 from app.schemas.category import CategoryResponseDTO
+from app.schemas.pagination import Pagination, PaginationResponse
 
 
 class TransactionBase(BaseModel):
@@ -29,6 +30,10 @@ class TransactionResponseDTO(TransactionBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class TransactionResponsePagination(PaginationResponse):
+    data: List[TransactionResponseDTO]
+
+
 class TransactionUpdateDTO(BaseModel):
     amount: Optional[Decimal] = Field(None, max_digits=10, decimal_places=2)
     category_id: Optional[int] = None
@@ -42,9 +47,7 @@ class OrderByOptions(enum.Enum):
     amount_asc = "amount:asc"
     amount_desc = "amount:desc"
 
-class TransactionFilters(BaseModel):
-    offset: int = Field(0, ge=0)
-    limit: int = Field(10, ge=1)
+class TransactionFilters(Pagination):
     category_type: Optional[CategoryType] = None
     category_id: Optional[List[int]] = None
     account_id: Optional[int] = None

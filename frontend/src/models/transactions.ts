@@ -64,3 +64,10 @@ export interface TransactionUpdate {
     date?: string
     comment?: string
 }
+
+export type TransactionResponsePagination = {
+    limit: number
+    offset: number
+    total: number
+    data: TransactionResponse[]
+}
