@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input"
 export function AccountsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountResponse | null>(null)
     const [formData, setFormData] = useState({
         name: "",
@@ -86,7 +87,7 @@ export function AccountsPage() {
         mutationFn: deleteAccount,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["accounts"] })
-            setIsEditOpen(false)
+            setIsDeleteOpen(false)
             setSelectedAccount(null)
             toast.success("Conta deletada com sucesso!")
         },
@@ -129,8 +130,14 @@ export function AccountsPage() {
         updateMutation.mutate({ id: selectedAccount.id, data: formData })
     }
 
-    const handleDelete = (accountId: number) => {
-        deleteMutation.mutate(accountId)
+    const handleOpenDelete = (account: AccountResponse) => {
+        setSelectedAccount(account)
+        setIsDeleteOpen(true)
+    }
+
+    const handleDelete = () => {
+        if (!selectedAccount) return
+        deleteMutation.mutate(selectedAccount.id)
     }
 
     if (isLoading) {
@@ -143,86 +150,87 @@ export function AccountsPage() {
 
     return accountsData && (
         <Layout title="Contas">
-            <div>
-                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
-                    <div>
-                        <h1 className="font-bold text-2xl">Minhas contas</h1>
-                        <span>Total: {formatCurrency(accountsData.total)}</span>
-                    </div>
-                    {accountsData.accounts.length > 0 &&
-                        <Button
-                            className="w-full mt-3 sm:w-50 sm:mt-0"
-                            onClick={handleOpenCreate}
-                        >
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
+                <div>
+                    <h1 className="font-bold text-2xl">Minhas contas</h1>
+                    <span>Total: {formatCurrency(accountsData.total)}</span>
+                </div>
+                {accountsData.accounts.length > 0 &&
+                    <Button
+                        className="w-full mt-3 sm:w-50 sm:mt-0"
+                        onClick={handleOpenCreate}
+                    >
+                        <PlusCircle />
+                        Adicionar conta
+                    </Button>}
+            </div>
+
+            {accountsData.accounts.length === 0 ?
+                <div className="border-2 border-dashed rounded-md">
+                    <EmptyData
+                        icon={<Wallet />}
+                        title="Nenhuma conta cadastrada"
+                        description="Clique no botão abaixo para cadastrar uma nova conta"
+                    >
+                        <Button onClick={handleOpenCreate}>
                             <PlusCircle />
                             Adicionar conta
-                        </Button>}
+                        </Button>
+                    </EmptyData>
                 </div>
-                {accountsData.accounts.length === 0 ?
-                    <div className="border-2 border-dashed rounded-md">
-                        <EmptyData
-                            icon={<Wallet />}
-                            title="Nenhuma conta cadastrada"
-                            description="Clique no botão abaixo para cadastrar uma nova conta"
-                        >
-                            <Button onClick={handleOpenCreate}>
-                                <PlusCircle />
-                                Adicionar conta
-                            </Button>
-                        </EmptyData>
-                    </div>
-                    :
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-                        {accountsData.accounts.map(account => (
-                            <div key={account.id} className="bg-white p-4 shadow-md rounded-md">
-                                <div className="pl-2" style={{
-                                    borderLeft: `10px solid ${account.color}`
-                                }}>
-                                    <h1 className="text-lg font-bold">{account.name}</h1>
-                                    <span className="text-sm">{formatCurrency(account.balance)}</span>
-                                </div>
-                                <div className="flex justify-end gap-2 mt-6">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="hover:bg-neutral-50/15"
-                                        onClick={() => handleOpenEdit(account)}
-                                    >
-                                        <Pencil />
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                            >
-                                                <Trash2 />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Tem certeza que deseja excluir esta conta?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as transações desta conta.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(account.id)}
-                                                >
-                                                    Excluir
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
+                :
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+                    {accountsData.accounts.map(account => (
+                        <div key={account.id} className="bg-white p-4 shadow-md rounded-md">
+                            <div className="pl-2" style={{
+                                borderLeft: `10px solid ${account.color}`
+                            }}>
+                                <h1 className="text-lg font-bold">{account.name}</h1>
+                                <span className="text-sm">{formatCurrency(account.balance)}</span>
                             </div>
-                        ))}
-                    </div>
-                }
-            </div>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="hover:bg-neutral-50/15"
+                                    onClick={() => handleOpenEdit(account)}
+                                >
+                                    <Pencil />
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => handleOpenDelete(account)}
+                                >
+                                    <Trash2 />
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            }
+
+            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <AlertDialogTrigger asChild>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Tem certeza que deseja excluir esta conta?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as transações desta conta.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            onClick={handleDelete}
+                        >
+                            Excluir
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className="sm:max-w-sm">

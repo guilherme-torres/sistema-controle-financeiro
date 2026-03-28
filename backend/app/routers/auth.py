@@ -46,4 +46,4 @@ def logout(
 
 @router.get("/me")
 def me(auth: AuthData = Depends(authorize)):
-    return {"user_id": auth.user_id}
+    return {"user_id": auth.user_id, "name": auth.name}

@@ -16,3 +16,4 @@ class UserSessionResponseDTO(BaseModel):
 class AuthData(BaseModel):
     user_id: int
     sid: str
+    name: str

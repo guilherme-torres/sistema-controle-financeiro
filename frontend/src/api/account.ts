@@ -21,7 +21,7 @@ export async function getAccount(id: number) {
     }
 }
 
-export async function listAccounts(offset: number = 0, limit: number = 10) {
+export async function listAccounts(offset: number = 0, limit: number = 100) {
     try {
         const response = await api.get<AccountResponseWithTotal>(`/accounts/`, {
             params: { limit, offset }

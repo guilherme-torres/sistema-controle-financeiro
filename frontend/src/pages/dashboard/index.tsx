@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout"
 import type { CategoryType } from "@/models/category"
 import type { TransactionFilters } from "@/models/transactions"
 import { useQuery } from "@tanstack/react-query"
+import { useRouteContext } from "@tanstack/react-router"
 import { useState } from "react"
 
 export function DashboardPage() {
@@ -22,9 +23,11 @@ export function DashboardPage() {
         queryFn: () => listTransactionsSummary(filters)
     })
 
+    const { authData } = useRouteContext({ from: "/_protected" })
+
     return (
         <Layout title="Dashboard">
-            dashboard
+            <h1>Olá, {authData.name}</h1>
         </Layout>
     )
 }

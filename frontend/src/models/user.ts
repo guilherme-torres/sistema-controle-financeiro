@@ -3,3 +3,8 @@ export interface UserCreate {
     email: string
     password: string
 }
+
+export type UserSession = {
+    user_id: number
+    name: string
+}

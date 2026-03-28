@@ -21,7 +21,7 @@ export async function getCategory(id: number) {
     }
 }
 
-export async function listCategories(category_type?: CategoryType, offset: number = 0, limit: number = 10) {
+export async function listCategories(category_type?: CategoryType, offset: number = 0, limit: number = 100) {
     try {
         const response = await api.get<CategoryResponse[]>(`/categories/`, {
             params: { limit, offset, category_type }

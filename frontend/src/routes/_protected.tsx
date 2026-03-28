@@ -9,6 +9,7 @@ export const Route = createFileRoute('/_protected')({
     if (!authData) {
         throw redirect({ to: '/login' });
     }
+    return { authData }
   },
   component: () => <Outlet />,
 })

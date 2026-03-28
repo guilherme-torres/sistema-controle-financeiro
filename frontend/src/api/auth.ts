@@ -1,8 +1,9 @@
 import { api } from "@/lib/api";
+import type { UserSession } from "@/models/user";
 
 export async function getAuthenticatedUser() {
     try {
-        const response = await api.get("/auth/me")
+        const response = await api.get<UserSession>("/auth/me")
         return response.data
     } catch (error: any) {
         if (error.response?.status === 401) {
