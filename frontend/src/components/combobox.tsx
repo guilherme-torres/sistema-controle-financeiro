@@ -43,7 +43,7 @@ export function Combobox({
                     <ChevronsUpDownIcon className='opacity-50' />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0">
+            <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
                 <Command>
                     <CommandList>
                         <CommandGroup>
