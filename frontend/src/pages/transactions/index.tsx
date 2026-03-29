@@ -1,5 +1,4 @@
 import { createTransaction, listTransactions } from "@/api/transactions"
-import { EmptyData } from "@/components/empty-data"
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,9 +23,9 @@ import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { CategoryType } from "@/models/category"
-import type { TransactionFilters, TransactionFormData } from "@/models/transactions"
+import { OrderByOptions, type TransactionFilters, type TransactionFormData } from "@/models/transactions"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Banknote, PlusCircle } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { listCategories } from "@/api/category"
@@ -43,6 +42,7 @@ export function TransactionsPage() {
     const [filters, setFilters] = useState<TransactionFilters>({
         limit: 10,
         offset: 0,
+        order_by: OrderByOptions.date_desc,
     })
     const [formData, setFormData] = useState<TransactionFormData>({
         amount: "",
@@ -117,6 +117,25 @@ export function TransactionsPage() {
         createMutation.mutate(createData)
     }
 
+    const handleSortChange = (columnKey: "date" | "amount") => {
+        setFilters((prev) => {
+            let newOrderBy = prev.order_by
+
+            if (columnKey === "date") {
+                newOrderBy = prev.order_by === OrderByOptions.date_desc
+                    ? OrderByOptions.date_asc
+                    : OrderByOptions.date_desc
+            }
+            else if (columnKey === "amount") {
+                newOrderBy = prev.order_by === OrderByOptions.amount_desc
+                    ? OrderByOptions.amount_asc
+                    : OrderByOptions.amount_desc
+            }
+
+            return { ...prev, order_by: newOrderBy }
+        })
+    }
+
     if (isLoading) {
         return (
             <Layout title="Categorias">
@@ -139,41 +158,34 @@ export function TransactionsPage() {
                     </Button>}
             </div>
 
-            {transactions.total === 0 ?
-                <div className="border-2 border-dashed rounded-md">
-                    <EmptyData
-                        icon={<Banknote />}
-                        title="Nenhuma transação cadastrada"
-                        description="Clique no botão abaixo para cadastrar uma nova transação"
-                    >
-                        <Button onClick={handleOpenCreate}>
-                            <PlusCircle />
-                            Adicionar transação
-                        </Button>
-                    </EmptyData>
-                </div>
-                :
-                <DataTable
-                    columns={columns}
-                    data={transactions.data}
-                    pageIndex={Math.floor(filters.offset / filters.limit)}
-                    pageSize={filters.limit}
-                    total={transactions.total}
-                    onPageChange={(pageIndex) =>
-                        setFilters((prev) => ({
-                            ...prev,
-                            offset: pageIndex * prev.limit,
-                        }))
-                    }
-                    onPageSizeChange={(pageSize) =>
-                        setFilters((prev) => ({
-                            ...prev,
-                            limit: pageSize,
-                            offset: 0,
-                        }))
-                    }
-                />
-            }
+            <DataTable
+                columns={columns}
+                data={transactions.data}
+                pageIndex={Math.floor(filters.offset / filters.limit)}
+                pageSize={filters.limit}
+                total={transactions.total}
+                onPageChange={(pageIndex) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        offset: pageIndex * prev.limit,
+                    }))
+                }
+                onPageSizeChange={(pageSize) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        limit: pageSize,
+                        offset: 0,
+                    }))
+                }
+                filters={filters}
+                onFiltersChange={(next) => {
+                    setFilters(next)
+                }}
+                meta={{
+                    currentOrder: filters.order_by,
+                    onSort: handleSortChange
+                }}
+            />
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className="sm:max-w-sm">

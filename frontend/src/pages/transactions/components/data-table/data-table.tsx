@@ -17,6 +17,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { TablePagination } from "./pagination"
+import { DataTableToolbar } from "./toolbar"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -24,8 +25,11 @@ interface DataTableProps<TData, TValue> {
     pageIndex: number
     pageSize: number
     total: number
+    filters: import("@/models/transactions").TransactionFilters
+    onFiltersChange: (filters: import("@/models/transactions").TransactionFilters) => void
     onPageChange: (pageIndex: number) => void
     onPageSizeChange: (pageSize: number) => void
+    meta?: any
 }
 
 export function DataTable<TData, TValue>({
@@ -34,8 +38,11 @@ export function DataTable<TData, TValue>({
     pageIndex,
     pageSize,
     total,
+    filters,
+    onFiltersChange,
     onPageChange,
     onPageSizeChange,
+    meta,
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
@@ -46,6 +53,7 @@ export function DataTable<TData, TValue>({
                 pageSize,
             },
         },
+        meta,
         manualPagination: true,
         pageCount: Math.ceil(total / pageSize),
         getCoreRowModel: getCoreRowModel(),
@@ -54,6 +62,8 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="overflow-hidden rounded-md border">
+            <DataTableToolbar filters={filters} onFiltersChange={onFiltersChange} />
+
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (

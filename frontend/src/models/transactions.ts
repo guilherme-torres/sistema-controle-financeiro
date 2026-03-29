@@ -15,7 +15,7 @@ export interface TransactionSummaryResponseWithTotal {
     summary: TransactionSummaryResponse[]
 }
 
-enum OrderByOptions {
+export enum OrderByOptions {
     date_asc = "date:asc",
     date_desc = "date:desc",
     amount_asc = "amount:asc",
@@ -26,7 +26,7 @@ export interface TransactionFilters {
     offset: number
     limit: number
     category_type?: CategoryType
-    category_id?: number
+    category_id?: number | number[]
     account_id?: number
     order_by?: OrderByOptions
     date?: string

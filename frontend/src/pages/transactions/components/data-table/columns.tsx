@@ -5,10 +5,21 @@ import type { TransactionResponse } from "@/models/transactions"
 import type { ColumnDef } from "@tanstack/react-table"
 import { format, parseISO } from "date-fns"
 import { RowActions } from "./row-actions"
+import { ColumnHeader } from "./column-header"
 
 export const columns: ColumnDef<TransactionResponse>[] = [
     {
-        header: () => <span className="font-bold">Valor</span>,
+        header: ({ table }) => {
+            const { currentOrder, onSort } = table.options.meta as any;
+            return (
+                <ColumnHeader
+                    title="Valor"
+                    columnKey="amount"
+                    currentOrder={currentOrder}
+                    onSort={onSort}
+                />
+            )
+        },
         accessorKey: "amount",
         cell: ({ row }) => <span className="font-bold">{formatCurrency(row.getValue("amount"))}</span>
     },
@@ -35,7 +46,17 @@ export const columns: ColumnDef<TransactionResponse>[] = [
         enableHiding: false,
     },
     {
-        header: () => <span className="font-bold">Data</span>,
+        header: ({ table }) => {
+            const { currentOrder, onSort } = table.options.meta as any;
+            return (
+                <ColumnHeader
+                    title="Data"
+                    columnKey="date"
+                    currentOrder={currentOrder}
+                    onSort={onSort}
+                />
+            )
+        },
         accessorKey: "date",
         cell: ({ row }) => <span>{format(parseISO(row.getValue("date")), "dd/MM/yyyy")}</span>
     },
