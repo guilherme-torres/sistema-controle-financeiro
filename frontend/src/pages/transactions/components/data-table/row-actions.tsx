@@ -1,67 +1,50 @@
-import { createTransaction, listTransactions } from "@/api/transactions"
-import { EmptyData } from "@/components/empty-data"
-import { Layout } from "@/components/layout"
-import { Button } from "@/components/ui/button"
+import { listAccounts } from "@/api/account";
+import { listCategories } from "@/api/category";
+import { deleteTransaction, updateTransaction } from "@/api/transactions";
+import { Combobox } from "@/components/combobox";
+import { DatePicker } from "@/components/date-picker";
+import { DeleteDialog } from "@/components/delete-dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select"
-import { Field, FieldGroup } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import type { CategoryType } from "@/models/category"
-import type { TransactionFilters, TransactionFormData } from "@/models/transactions"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Banknote, PlusCircle } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-import { listCategories } from "@/api/category"
-import { Combobox } from "@/components/combobox"
-import { DatePicker } from "@/components/date-picker"
-import { listAccounts } from "@/api/account"
-import { Textarea } from "@/components/ui/textarea"
-import { DataTable } from "./components/data-table/data-table"
-import { columns } from "./components/data-table/columns"
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { CategoryType } from "@/models/category";
+import type { TransactionFormData, TransactionResponse, TransactionUpdate } from "@/models/transactions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Row } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
-export function TransactionsPage() {
-    const [isCreateOpen, setIsCreateOpen] = useState(false)
-    const [transactionType, setTransactionType] = useState("EXPENSES")
-    const [filters, setFilters] = useState<TransactionFilters>({
-        limit: 10,
-        offset: 0,
-    })
+export function RowActions<TData>({ row }: { row: Row<TData> }) {
+    const transaction = row.original as TransactionResponse
+
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
     const [formData, setFormData] = useState<TransactionFormData>({
-        amount: "",
-        category_id: "",
-        account_id: "",
-        date: new Date(),
-        comment: undefined,
+        amount: transaction.amount,
+        category_id: String(transaction.category_id),
+        account_id: String(transaction.account_id),
+        date: new Date(`${transaction.date}T00:00:00`),
+        comment: transaction.comment ?? "",
     })
+    const [transactionType, setTransactionType] = useState(transaction.category_type)
 
     const queryClient = useQueryClient()
 
-    const { data: transactions = { total: 0, limit: 0, offset: 0, data: [] }, isLoading } = useQuery({
-        queryKey: ["transactions", filters],
-        queryFn: () => listTransactions(filters),
-    })
-
     const { data: categories = [] } = useQuery({
         queryKey: ["categories", transactionType],
-        queryFn: () => listCategories(transactionType as CategoryType),
+        queryFn: () => listCategories(transactionType),
     })
 
     const { data: accountsData } = useQuery({
@@ -69,43 +52,49 @@ export function TransactionsPage() {
         queryFn: () => listAccounts(),
     })
 
-    const createMutation = useMutation({
-        mutationFn: createTransaction,
+    const deleteMutation = useMutation({
+        mutationFn: deleteTransaction,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["transactions"] })
-            setIsCreateOpen(false)
+            setIsDeleteOpen(false)
+            toast.success("Transação deletada com sucesso!")
+        },
+        onError: (error: any) => {
+            toast.error(error.message)
+        },
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number; data: TransactionUpdate }) =>
+            updateTransaction(id, data),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["transactions"] })
+            setIsEditOpen(false)
             setFormData({
-                amount: "",
-                category_id: "",
-                account_id: "",
-                date: new Date(),
-                comment: undefined,
+                amount: data.amount,
+                category_id: String(data.category_id),
+                account_id: String(data.account_id),
+                date: new Date(`${data.date}T00:00:00`),
+                comment: data.comment,
             })
-            toast.success("Transação criada com sucesso!")
+            toast.success("Transação atualizada com sucesso!")
         },
         onError: (error) => {
             toast.error(error.message)
         },
     })
 
-    const handleOpenCreate = () => {
-        setFormData({
-            amount: "",
-            category_id: "",
-            account_id: "",
-            date: new Date(),
-            comment: undefined,
-        })
-        setIsCreateOpen(true)
+    function handleDelete() {
+        deleteMutation.mutate(transaction.id)
     }
 
-    const handleCreate = (e: React.SubmitEvent<HTMLFormElement>) => {
+    function handleUpdate(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         if (!formData.amount || !formData.category_id || !formData.account_id || !formData.date) {
             toast.error("Preencha todos os campos obrigatórios!")
             return
         }
-        const createData = {
+        const data = {
             amount: formData.amount,
             category_id: Number(formData.category_id),
             account_id: Number(formData.account_id),
@@ -114,81 +103,57 @@ export function TransactionsPage() {
                 formData.comment.trim() ? formData.comment.trim() : undefined
                 : undefined
         }
-        createMutation.mutate(createData)
-    }
-
-    if (isLoading) {
-        return (
-            <Layout title="Categorias">
-                carregando...
-            </Layout>
-        )
+        updateMutation.mutate({ id: transaction.id, data })
     }
 
     return (
-        <Layout title="Transações">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end">
-                <h1 className="font-bold text-2xl">Minhas transações</h1>
-                {transactions.total > 0 &&
-                    <Button
-                        className="w-full mt-3 sm:w-50 sm:mt-0"
-                        onClick={handleOpenCreate}
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+                        Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={() => setIsDeleteOpen(true)}
+                        variant="destructive"
                     >
-                        <PlusCircle />
-                        Adicionar transação
-                    </Button>}
-            </div>
+                        Deletar
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
 
-            {transactions.total === 0 ?
-                <div className="border-2 border-dashed rounded-md">
-                    <EmptyData
-                        icon={<Banknote />}
-                        title="Nenhuma transação cadastrada"
-                        description="Clique no botão abaixo para cadastrar uma nova transação"
-                    >
-                        <Button onClick={handleOpenCreate}>
-                            <PlusCircle />
-                            Adicionar transação
-                        </Button>
-                    </EmptyData>
-                </div>
-                :
-                <DataTable
-                    columns={columns}
-                    data={transactions.data}
-                    pageIndex={Math.floor(filters.offset / filters.limit)}
-                    pageSize={filters.limit}
-                    total={transactions.total}
-                    onPageChange={(pageIndex) =>
-                        setFilters((prev) => ({
-                            ...prev,
-                            offset: pageIndex * prev.limit,
-                        }))
-                    }
-                    onPageSizeChange={(pageSize) =>
-                        setFilters((prev) => ({
-                            ...prev,
-                            limit: pageSize,
-                            offset: 0,
-                        }))
-                    }
-                />
-            }
+            <DeleteDialog
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                title="Tem certeza que deseja excluir esta transação?"
+                description="Esta ação não pode ser desfeita."
+                handleDelete={handleDelete}
+            />
 
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>Nova transação</DialogTitle>
+                        <DialogTitle>Editar transação</DialogTitle>
                         <DialogDescription>
-                            Adicione uma nova transação.
+                            Edite os dados desta transação.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreate} className="space-y-4">
+                    <form onSubmit={handleUpdate} className="space-y-4">
                         <FieldGroup>
                             <Field>
                                 <div className="w-full max-w-sm space-y-2">
                                     <Label htmlFor="transaction-type">Tipo</Label>
-                                    <Select defaultValue="EXPENSES" value={transactionType} onValueChange={setTransactionType}>
+                                    <Select
+                                        value={transactionType}
+                                        onValueChange={(value) => setTransactionType(value as CategoryType)}
+                                    >
                                         <SelectTrigger id="transaction-type" className="w-full">
                                             <SelectValue placeholder="Selecione o tipo" />
                                         </SelectTrigger>
@@ -313,6 +278,6 @@ export function TransactionsPage() {
                     </form>
                 </DialogContent>
             </Dialog>
-        </Layout>
+        </>
     )
 }

@@ -4,6 +4,7 @@ import {
     type ColumnDef,
     flexRender,
     getCoreRowModel,
+    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table"
 
@@ -15,20 +16,40 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { TablePagination } from "./pagination"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    pageIndex: number
+    pageSize: number
+    total: number
+    onPageChange: (pageIndex: number) => void
+    onPageSizeChange: (pageSize: number) => void
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    pageIndex,
+    pageSize,
+    total,
+    onPageChange,
+    onPageSizeChange,
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
         columns,
+        state: {
+            pagination: {
+                pageIndex,
+                pageSize,
+            },
+        },
+        manualPagination: true,
+        pageCount: Math.ceil(total / pageSize),
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (
@@ -75,6 +96,16 @@ export function DataTable<TData, TValue>({
                     )}
                 </TableBody>
             </Table>
+            <div className="p-4">
+                <TablePagination
+                    pageIndex={table.getState().pagination.pageIndex}
+                    pageCount={table.getPageCount()}
+                    pageSize={table.getState().pagination.pageSize}
+                    rowCount={total}
+                    onPageChange={(pageIndex) => onPageChange(pageIndex)}
+                    onPageSizeChange={(pageSize) => onPageSizeChange(pageSize)}
+                />
+            </div>
         </div>
     )
 }

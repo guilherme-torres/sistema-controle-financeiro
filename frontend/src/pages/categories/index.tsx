@@ -17,17 +17,6 @@ import {
 } from "@/api/category"
 import { EmptyData } from "@/components/empty-data"
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger
-} from "@/components/ui/alert-dialog"
-import {
     Dialog,
     DialogClose,
     DialogContent,
@@ -37,6 +26,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog"
 import { Field, FieldGroup } from "@/components/ui/field"
+import { DeleteDialog } from "@/components/delete-dialog"
 
 function CategoryList({
     categories,
@@ -249,27 +239,13 @@ export function CategoriesPage() {
                 </TabsContent>
             </Tabs>
 
-            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <AlertDialogTrigger asChild>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Tem certeza que deseja excluir esta categoria?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            onClick={handleDelete}
-                        >
-                            Excluir
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteDialog
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                title="Tem certeza que deseja excluir esta categoria?"
+                description="Esta ação não pode ser desfeita."
+                handleDelete={handleDelete}
+            />
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className="sm:max-w-sm">

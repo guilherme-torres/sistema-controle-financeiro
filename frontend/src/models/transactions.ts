@@ -71,3 +71,11 @@ export type TransactionResponsePagination = {
     total: number
     data: TransactionResponse[]
 }
+
+export interface TransactionFormData {
+    amount: string
+    category_id: string
+    account_id: string
+    date?: Date
+    comment?: string
+}

@@ -12,17 +12,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { formatCurrency } from "@/lib/utils"
 import { Wallet, Trash2, PlusCircle, Pencil } from "lucide-react"
 import {
@@ -37,6 +26,7 @@ import { EmptyData } from "@/components/empty-data"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { DeleteDialog } from "@/components/delete-dialog"
 
 export function AccountsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -210,27 +200,13 @@ export function AccountsPage() {
                 </div>
             }
 
-            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <AlertDialogTrigger asChild>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Tem certeza que deseja excluir esta conta?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as transações desta conta.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            onClick={handleDelete}
-                        >
-                            Excluir
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteDialog
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                title="Tem certeza que deseja excluir esta conta?"
+                description="Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as transações desta conta."
+                handleDelete={handleDelete}
+            />
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className="sm:max-w-sm">

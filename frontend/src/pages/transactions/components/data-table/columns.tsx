@@ -1,14 +1,16 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { TransactionResponse } from "@/models/transactions"
 import type { ColumnDef } from "@tanstack/react-table"
 import { format, parseISO } from "date-fns"
+import { RowActions } from "./row-actions"
 
 export const columns: ColumnDef<TransactionResponse>[] = [
     {
         header: () => <span className="font-bold">Valor</span>,
         accessorKey: "amount",
-        cell: ({ row }) => <span>{formatCurrency(row.getValue("amount"))}</span>
+        cell: ({ row }) => <span className="font-bold">{formatCurrency(row.getValue("amount"))}</span>
     },
     {
         header: () => <span className="font-bold">Tipo</span>,
@@ -49,12 +51,24 @@ export const columns: ColumnDef<TransactionResponse>[] = [
         header: () => <span className="font-bold">Comentário</span>,
         accessorKey: "comment",
         cell: ({ row }) => {
-            const MAX_SIZE = 30
-            let comment = row.getValue("comment") as string
-            if (comment && comment.length > MAX_SIZE) {
-                comment = comment.slice(0, MAX_SIZE) + "..."
-            }
-            return <span>{comment}</span>
+            const comment = row.getValue<string>("comment");
+
+            return (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="max-w-60 truncate">
+                            {comment}
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{comment}</p>
+                    </TooltipContent>
+                </Tooltip>
+            );
         }
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => <RowActions row={row} />
     },
 ]
