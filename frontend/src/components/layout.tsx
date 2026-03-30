@@ -13,7 +13,7 @@ export function Layout({ title, children }: { title?: string, children: React.Re
     const navigate = useNavigate()
 
     const logoutMutation = useMutation({
-        mutationFn: () => logout(),
+        mutationFn: logout,
         onSuccess: () => {
             navigate({ to: "/login" })
         },
@@ -38,9 +38,9 @@ export function Layout({ title, children }: { title?: string, children: React.Re
                         {title && <h1>{title}</h1>}
                     </div>
                     <Button
-                        variant={"destructive"}
+                        variant="ghost"
                         onClick={() => logoutMutation.mutate()}
-                        className="cursor-pointer"
+                        className="hover:bg-destructive/20 hover:text-foreground"
                     >
                         <LogOut />Sair
                     </Button>
